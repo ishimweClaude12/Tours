@@ -48,3 +48,21 @@ const user =await User.findOne({email}).select('+password');
     })
 
 }
+
+exports.protect = async (req, res, next)=>{
+    // check if the token exists
+    let token;
+    if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
+      token = req.headers.authorization.split(' ')[1];
+        
+    }
+    
+
+    if(!token){
+        res.status(401).json({
+            Status: 'Login First'
+        })
+    }
+
+    next();
+}
