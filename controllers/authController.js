@@ -1,3 +1,4 @@
+const {promisify} = require('util');
 const User = require('./../model/userModel');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs')
@@ -44,6 +45,7 @@ const user =await User.findOne({email}).select('+password');
     const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {expiresIn: '1h'} )
     res.status(200).json({
         Status: 'Success',
+        user_id: user._id,
         token
     })
 
@@ -51,18 +53,44 @@ const user =await User.findOne({email}).select('+password');
 
 exports.protect = async (req, res, next)=>{
     // check if the token exists
-    let token;
-    if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
-      token = req.headers.authorization.split(' ')[1];
+    try {
+        let token;
+        if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
+          token = req.headers.authorization.split(' ')[1];
+            
+        }
         
-    }
     
-
-    if(!token){
-        res.status(401).json({
-            Status: 'Login First'
+        if(!token){
+            res.status(401).json({
+                Status: 'Login First'
+            })
+        }
+    
+      const decoded =  await jwt.verify(token, process.env.JWT_SECRET)
+        let freshUser = await User.findOne({_id: decoded.id});
+        req.user = freshUser;
+        next();
+    } catch (error) {
+        res.status(403).json({
+            Status: 'Invalid Token'
         })
     }
+   
+}
 
-    next();
+exports.restrictTo = (...roles) =>{
+    return (req, res, next)=>{
+       if(roles.includes(req.user.role)){
+        res.status(200).json({
+            Status: 'Deleted Successfully'
+        })
+        next();
+       }
+       else{
+        res.status(403).json({
+            Status: 'Invalid Role'
+        })
+       }
+    }
 }
