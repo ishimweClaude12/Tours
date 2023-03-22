@@ -91,12 +91,12 @@ const deleteTour = async(req, res)=>{
     try {
         await Tour.findByIdAndDelete(req.params.id)
 
-        res.status(204).json({
+     return   res.status(204).json({
             status: 'Successful', 
             message: 'Deleted This Object'
         })
     } catch (error) {
-        res.status(400).json({
+    return    res.status(400).json({
             status: 'failed', 
             message: error
         })
@@ -126,14 +126,14 @@ const getToursStats = async (req, res)=>{
             }
         
     ])
-    res.status(201).json({
+ return   res.status(201).json({
         status: 'Successful', 
         data: {
             stats
         }
     })
     } catch (error) {
-        res.status(400).json({
+    return    res.status(400).json({
             status: 'failed', 
             err: 'couldn ',
             message: error

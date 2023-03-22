@@ -37,7 +37,8 @@ exports.createUser = async (req, res)=>{
         Status: 'Success', 
         data: {
             user: newUser
-        }
+        },
+        token
     })
 
     res.status(500).json({

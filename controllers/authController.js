@@ -62,7 +62,7 @@ exports.protect = async (req, res, next)=>{
         
     
         if(!token){
-            res.status(401).json({
+          return  res.status(401).json({
                 Status: 'Login First'
             })
         }
@@ -93,4 +93,18 @@ exports.restrictTo = (...roles) =>{
         })
        }
     }
+};
+exports.forgotPassword = async (req, res, next) =>{
+
+    const user = await User.findOne({email: req.body.email});
+
+    if(!user){
+        return res.status(404).json({
+            Status: 'This user is not found'
+        })
+    }
+    const resetToken = user.createPasswordResetToken();
+
+    await user.save( {validateBeforeSave: false });
+    next();
 }
