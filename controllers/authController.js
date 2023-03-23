@@ -2,7 +2,8 @@ const {promisify} = require('util');
 const User = require('./../model/userModel');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs')
-require('dotenv').config()
+require('dotenv').config();
+const sendEmail = require('./../utils/email');
 
 exports.signup = async (req, res, next)=>{
     try {
@@ -101,10 +102,30 @@ exports.forgotPassword = async (req, res, next) =>{
     if(!user){
         return res.status(404).json({
             Status: 'This user is not found'
+          
         })
+        next()
     }
     const resetToken = user.createPasswordResetToken();
-
     await user.save( {validateBeforeSave: false });
-    next();
+    
+    
+    const message = 'This message is to let you know that your password is being reset, if you alow it to be altered then click the button below';
+    try{
+        await sendEmail({
+        // from : user.email,
+        to: 'ishimweklaude7@gmail.com',  
+        subject: 'Your Password reset token is valid for 10 minutes' ,
+        message, 
+        resetToken
+    })
+    res.status(200).json({
+        Status: 'Token Sent With the Email'
+    });
+    } catch{
+        user.passwordResetToken = undefined;
+        user.passwordResetExpires = undefined;
+        await user.save( {validateBeforeSave: false });
+        next();
+    }
 }
