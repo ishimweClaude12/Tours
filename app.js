@@ -2,8 +2,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const toursRouter = require('./routes/toursRoutes')
-const usersRouter = require('./routes/usersRoutes')
-
+const usersRouter = require('./routes/usersRoutes');
+const grobalErrorHandler = require('./controllers/errorController');
+const APPERROR = require('./utils/ErrorHandler');
 
 
 const app = express();
@@ -20,30 +21,14 @@ app.all('*', (req, res, next)=>{
     //     message: `could not get ${req.originalUrl}`
 
     // });
-    const err = new Error ('Coud not get that Url');
-      err.statusCode = 404;
-      err.status = 'Failed';
+    // const err = new Error ('Coud not get that Url');
+    //   err.statusCode = 404;
+    //   err.status = Error.message;
 
 
-    next(err);
+    next(new APPERROR('this route is not defined now', 402));
 })
-// app.use((err, req, res, next)={
-//     statusCode = err.statusCode || 500; 
-//     status = err.status || 'error'
-//     res.status(statusCode).json({
-//       status: status, 
-//       message: err
-//     });
-//   next();
- 
-// })
 
-app.use((err, req, res, next) => {
-  err.statusCode = err.statusCode || 500;
-  err.status = err.status || 'error'
-  res.status(err.statusCode).json({
-    status: err.status, 
-    message: err
-  })
-})
+
+app.use(grobalErrorHandler);
 module.exports = app;
