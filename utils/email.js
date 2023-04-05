@@ -36,8 +36,8 @@ const mailOptions = {
   from: 'dpqb12hakuo@gmail.com',
   to: options.to,
   subject: options.subject,
-//   text: options.message
-html: '<h1>Password Reset Request</h1>'
+  text: options.message
+// html: '<h1>Password Reset Request</h1>'
 };
 await transporter.sendMail(mailOptions, function(error, info){
   if (error) {

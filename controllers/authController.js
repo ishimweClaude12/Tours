@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs')
 require('dotenv').config();
 const sendEmail = require('./../utils/email');
+const APPERROR = require('./../utils/ErrorHandler');
 
 exports.signup = async (req, res, next)=>{
     try {
@@ -107,20 +108,22 @@ exports.forgotPassword = async (req, res, next) =>{
         next()
     }
     const resetToken = user.createPasswordResetToken();
+    console.log(resetToken);
+    User.passwordResetToken = resetToken;
     await user.save( {validateBeforeSave: false });
     
-    
-    const message = 'This message is to let you know that your password is being reset, if you alow it to be altered then click the button below';
+    const message = `This message is to let you know that your password is being reset, if you alow it to be altered then click the button below or else your reset token is ${resetToken}`;
     try{
         await sendEmail({
-        // from : user.email,
-        to: 'ishimweklaude7@gmail.com',  
+        to : user.email,
+       // to: 'ishimweklaude7@gmail.com',  
         subject: 'Your Password reset token is valid for 10 minutes' ,
         message, 
         resetToken
     })
     res.status(200).json({
-        Status: 'Token Sent With the Email'
+        Status: 'Token Sent With the Email',
+        resetToken
     });
     } catch{
         user.passwordResetToken = undefined;
@@ -128,4 +131,19 @@ exports.forgotPassword = async (req, res, next) =>{
         await user.save( {validateBeforeSave: false });
         next();
     }
+}
+exports.resetPassword = async(req, res,next) =>{
+    const user = await User.findOne({email: req.body.email});
+    if(!user){
+        return next(new APPERROR('The email provided does not exist among the users', 404))
+    }
+    res.status(200).json({
+        Status: 'Success', 
+        user
+    })
+}
+exports.updatePassword = async (req, res, next)=>{
+
+    const user = User.findOne({user});
+
 }
